@@ -7,24 +7,19 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
 
-// 👇 IMPORTANTE
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import QueryProvider from '../src/providers/QueryProvider';
 
 export { ErrorBoundary } from 'expo-router';
-
-// 👇 crear cliente
-const queryClient = new QueryClient();
-
 export default function RootLayout() {
   const { colorScheme } = useColorScheme();
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <QueryProvider>
       <ThemeProvider value={NAV_THEME[colorScheme ?? 'light']}>
         <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
         <Stack />
         <PortalHost />
       </ThemeProvider>
-    </QueryClientProvider>
+    </QueryProvider>
   );
 }

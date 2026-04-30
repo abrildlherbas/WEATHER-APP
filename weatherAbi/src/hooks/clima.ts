@@ -11,36 +11,55 @@ export const usarPronosticoClimatico = ({
   longitud: number;
   clave_de_api: string;
 }) => {
-  const { isPending, isFetched, isError, error, data } = useQuery({
-    queryKey: [fecha.getDate(), fecha.getHours(), latitud.toPrecision(2), longitud.toPrecision(2)],
+  const { isPending, isError, error, data } = useQuery({
+    queryKey: [
+      fecha.getDate(),
+      fecha.getHours(),
+      latitud.toPrecision(2),
+      longitud.toPrecision(2),
+    ],
+
     queryFn: async () => {
       const resultado = await fetch(
-        `http://api.weatherapi.com/v1/current.json?key=${clave_de_api}&q=${latitud},${longitud}`
+        `https://api.weatherapi.com/v1/current.json?key=${clave_de_api}&q=${latitud},${longitud}`
       );
+
       const data = await resultado.json();
+
+      // 🔍 DEBUG (podés borrarlo después)
+      console.log('RESPUESTA API 👉', data);
+
       return data;
     },
   });
 
   return {
+    // estados
     estaPendiente: () => isPending,
     huboUnProblema: () => isError,
-    consultaExitosa: () => isFetched,
-    ciudad: () => (isFetched ? data.location.name : ''),
-    condicionClimatica: () => (isFetched ? data.current.condition.text : ''),
-    humedadEnPorcentaje: () => (isFetched ? data.current.humidity : 0),
-    presionEnHectopascales: () => (isFetched ? data.current.pressure_mb : 0),
-    velocidadDelVientoEnKilometrosPorHora: () => (isFetched ? data.current.wind_kph : 0),
-    temperaturaEnGradosCelsius: () => (isFetched ? data.current.temp_c : 0),
-    descripcionDelProblema: () => (isError ? (error as Error).message : ''),
+
+    // datos seguros (NO rompen nunca)
+    ciudad: () => data?.location?.name ?? 'Cargando...',
+    condicionClimatica: () => data?.current?.condition?.text ?? '',
+    humedadEnPorcentaje: () => data?.current?.humidity ?? 0,
+    presionEnHectopascales: () => data?.current?.pressure_mb ?? 0,
+    velocidadDelVientoEnKilometrosPorHora: () => data?.current?.wind_kph ?? 0,
+    temperaturaEnGradosCelsius: () => data?.current?.temp_c ?? 0,
+
+    // error
+    descripcionDelProblema: () =>
+      isError ? (error as Error).message : '',
+
+    // objeto completo
     pronostico: () =>
-      isFetched
+      data?.current
         ? {
-            condicion_climatica: data.current.condition.text,
-            humedad_en_porcentaje: data.current.humidity,
-            presion_en_hectopascales: data.current.pressure_mb,
-            velocidad_del_viento_en_kilometros_por_hora: data.current.wind_kph,
-            temperatura_en_grados_celsius: data.current.temp_c,
+            condicion_climatica: data.current.condition?.text ?? '',
+            humedad_en_porcentaje: data.current.humidity ?? 0,
+            presion_en_hectopascales: data.current.pressure_mb ?? 0,
+            velocidad_del_viento_en_kilometros_por_hora:
+              data.current.wind_kph ?? 0,
+            temperatura_en_grados_celsius: data.current.temp_c ?? 0,
           }
         : null,
   };
