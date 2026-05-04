@@ -28,6 +28,7 @@ const PantallaInicialParaElClima = () => {
               latitud={coordenadas().latitud}
               longitud={coordenadas().longitud}
               clave_de_api={process.env.EXPO_PUBLIC_API_KEY as string}
+              ciudadOverride={coordenadas().ciudad}
             />
 
             <TarjetaParaDatosClimaticos
@@ -35,6 +36,7 @@ const PantallaInicialParaElClima = () => {
               latitud={coordenadas().latitud}
               longitud={coordenadas().longitud}
               clave_de_api={process.env.EXPO_PUBLIC_API_KEY as string}
+              ciudadOverride={coordenadas().ciudad}
             />
 
             <TarjetaParaDatosClimaticos
@@ -42,6 +44,7 @@ const PantallaInicialParaElClima = () => {
               latitud={coordenadas().latitud}
               longitud={coordenadas().longitud}
               clave_de_api={process.env.EXPO_PUBLIC_API_KEY as string}
+              ciudadOverride={coordenadas().ciudad}
             />
           </>
         )}

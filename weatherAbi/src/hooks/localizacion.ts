@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import {
   requestForegroundPermissionsAsync,
   getCurrentPositionAsync,
+  reverseGeocodeAsync,
 } from 'expo-location';
 
-export const usarLocalizacion = () => {
+const usarLocalizacion = () => {
   const [coordenadas, cambiarCoordenadas] = useState<{
     latitud: number;
     longitud: number;
+    ciudad: string;
   } | null>(null);
 
   const [permiso, cambiarEstadoDeLosPermisos] = useState(false);
@@ -15,19 +17,31 @@ export const usarLocalizacion = () => {
   useEffect(() => {
     async function obtenerLocalizacionActual() {
       const { status } = await requestForegroundPermissionsAsync();
+      if (status !== 'granted') return;
 
-      if (status !== 'granted') {
-        console.log('❌ Permiso denegado');
-        return;
+      const loc = await getCurrentPositionAsync({});
+      const { latitude, longitude } = loc.coords;
+
+      const [lugar] = await reverseGeocodeAsync({ latitude, longitude });
+      console.log('📍 LUGAR 👉', JSON.stringify(lugar, null, 2));
+
+      // Prioridad: district → city → region → fallback
+      let ciudad =
+        (lugar?.district ||
+          lugar?.city ||
+          lugar?.region ||
+          'VILLA LUGANO'
+        ).toUpperCase();
+
+      // 🔥 Hack para barrios de CABA
+      if (ciudad === 'COMUNA 8') {
+        ciudad = 'VILLA LUGANO';
       }
 
-      const localizacion = await getCurrentPositionAsync({});
-
-      console.log('📍 COORDENADAS REALES 👉', localizacion.coords);
-
       cambiarCoordenadas({
-        latitud: localizacion.coords.latitude,
-        longitud: localizacion.coords.longitude,
+        latitud: latitude,
+        longitud: longitude,
+        ciudad,
       });
 
       cambiarEstadoDeLosPermisos(true);
